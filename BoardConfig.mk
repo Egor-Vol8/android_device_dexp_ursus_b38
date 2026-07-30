@@ -1,0 +1,21 @@
+# Конфигурация железа DEXP Ursus B38 (SC7731E)
+TARGET_ARCH := arm
+TARGET_ARCH_VARIANT := armv7-a-neon
+TARGET_CPU_VARIANT := cortex-a7
+TARGET_CPU_SMP := true
+
+# Ядро
+TARGET_PREBUILT_KERNEL := device/dexp/ursus_b38/kernel
+BOARD_KERNEL_CMDLINE := console=ttyS1,115200n8 buildvariant=user
+BOARD_KERNEL_BASE := 0x00000000
+BOARD_PAGE_SIZE := 2048
+
+# Разделы (Берем из стоковых параметров AIK)
+BOARD_RECOVERYIMAGE_PARTITION_SIZE := 36700160
+BOARD_FLASH_BLOCK_SIZE := 131072
+
+# Оранжевый Лис
+FOX_VERSION := R11.1
+OF_MAINTAINER := "Egor-Vol8"
+DISABLE_STYLUS_FUNCTIONS := true
+TARGET_USERIMAGES_USE_EXT4 := true
