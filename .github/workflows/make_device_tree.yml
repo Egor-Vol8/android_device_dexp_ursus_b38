@@ -1,0 +1,44 @@
+name: Make Device Tree from Kernel
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Проверка репозитория
+      uses: actions/checkout@v4
+
+    - name: Настройка Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Установка инструментов
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cpio wget xz-utils
+        pip install twrpdtgen
+
+    - name: Генерация дерева устройств
+      run: |
+        # Собираем полноценное дерево из загруженного ядра
+        mkdir -p output_tree
+        
+        # Переименовываем файл для утилиты, если он называется иначе
+        [ -f "recovery.img-kernel" ] && mv recovery.img-kernel kernel.img
+        [ -f "kernel" ] && mv kernel kernel.img
+        
+        # Если утилита попросит полноценный образ, мы соберем пустышку вокруг ядра
+        # Но сначала пробуем скормить напрямую
+        if [ -f "kernel.img" ]; then
+          python3 -m twrpdtgen kernel.img -o output_tree/ || echo "Нужен полноценный разбор"
+        fi
+
+    - name: Загрузка готового дерева в артефакты
+      uses: actions/upload-artifact@v4
+      with:
+        name: finished_device_tree
+        path: output_tree/
