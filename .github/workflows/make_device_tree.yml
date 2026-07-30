@@ -1,4 +1,4 @@
-name: Make Device Tree from Kernel
+name: Make Device Tree from Link
 
 on:
   workflow_dispatch:
@@ -11,31 +11,84 @@ jobs:
     - name: Проверка репозитория
       uses: actions/checkout@v4
 
-    - name: Настройка Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
-
-    - name: Установка инструментов
+    - name: Установка зависимостей
       run: |
         sudo apt-get update
-        sudo apt-get install -y cpio wget xz-utils
-        pip install twrpdtgen
+        sudo apt-get install -y cpio wget xz-utils unzip
 
-    - name: Генерация дерева устройств
+    - name: Распаковка и сборка дерева
       run: |
-        # Собираем полноценное дерево из загруженного ядра
-        mkdir -p output_tree
+        # 1. Скачиваем рабочий AIK-Linux
+        LINK_A="https://""github.com""/SebaUbuntu/AIK-Linux-mirror/archive/refs/heads/master.zip"
+        wget "$LINK_A" -O aik.zip
+        unzip aik.zip
+        cd AIK-Linux-mirror-master
         
-        # Переименовываем файл для утилиты, если он называется иначе
-        [ -f "recovery.img-kernel" ] && mv recovery.img-kernel kernel.img
-        [ -f "kernel" ] && mv kernel kernel.img
+        # 2. Скачиваем твой рабочий recovery.img по ссылке Яндекса
+        LINK_B="https://""clck.ru""/3V37zk"
+        wget --max-redirect=20 -O recovery.img "$LINK_B"
         
-        # Если утилита попросит полноценный образ, мы соберем пустышку вокруг ядра
-        # Но сначала пробуем скормить напрямую
-        if [ -f "kernel.img" ]; then
-          python3 -m twrpdtgen kernel.img -o output_tree/ || echo "Нужен полноценный разбор"
-        fi
+        chmod +x *.sh
+        chmod +x bin/*
+        ./unpackimg.sh recovery.img
+        
+        # 3. Начинаем собирать Дерево Устройства (Device Tree) в папке output_tree
+        mkdir -p ../output_tree
+        
+        # Копируем стоковое ядро
+        sudo cp split_img/recovery.img-kernel ../output_tree/kernel
+        [ -f split_img/recovery.img-dtb ] && sudo cp split_img/recovery.img-dtb ../output_tree/dtb || echo "No DTB"
+        
+        # Вытаскиваем стоковые файлы разметки памяти и конфиги
+        sudo cp ramdisk/system/etc/recovery.fstab ../output_tree/recovery.fstab || sudo cp ramdisk/etc/recovery.fstab ../output_tree/recovery.fstab || echo "No fstab"
+        
+        # 4. Создаем базовый BoardConfig.mk для OrangeFox
+        cd ../output_tree
+        sudo touch BoardConfig.mk
+        sudo chmod 777 BoardConfig.mk
+        
+        cat <<EOF > BoardConfig.mk
+        # Конфигурация железа DEXP Ursus B38 (SC7731E)
+        TARGET_ARCH := arm
+        TARGET_ARCH_VARIANT := armv7-a-neon
+        TARGET_CPU_VARIANT := cortex-a7
+        TARGET_CPU_SMP := true
+        
+        # Ядро
+        TARGET_PREBUILT_KERNEL := device/dexp/ursus_b38/kernel
+        BOARD_KERNEL_CMDLINE := $(cat ../AIK-Linux-mirror-master/split_img/recovery.img-cmdline 2>/dev/null || echo "")
+        BOARD_KERNEL_BASE := $(cat ../AIK-Linux-mirror-master/split_img/recovery.img-base 2>/dev/null || echo "0x00000000")
+        BOARD_PAGE_SIZE := $(cat ../AIK-Linux-mirror-master/split_img/recovery.img-pagesize 2>/dev/null || echo "2048")
+        
+        # Разделы (Берем из стоковых параметров AIK)
+        BOARD_RECOVERYIMAGE_PARTITION_SIZE := $(cat ../AIK-Linux-mirror-master/split_img/recovery.img-size 2>/dev/null || echo "36700160")
+        BOARD_FLASH_BLOCK_SIZE := 131072
+        
+        # Оранжевый Лис
+        FOX_VERSION := R11.1
+        OF_MAINTAINER := "Egor-Vol8"
+        DISABLE_STYLUS_FUNCTIONS := true
+        TARGET_USERIMAGES_USE_EXT4 := true
+        EOF
+
+        # 5. Создаем AndroidProducts.mk
+        sudo touch AndroidProducts.mk
+        sudo chmod 777 AndroidProducts.mk
+        cat <<EOF > AndroidProducts.mk
+        PRODUCT_MAKEFILES := \$(LOCAL_DIR)/omni_ursus_b38.mk
+        EOF
+
+        # 6. Создаем omni_ursus_b38.mk
+        sudo touch omni_ursus_b38.mk
+        sudo chmod 777 omni_ursus_b38.mk
+        cat <<EOF > omni_ursus_b38.mk
+        \$(call inherit-product, \$(SRC_TARGET_DIR)/product/full_base_telephony.mk)
+        PRODUCT_DEVICE := ursus_b38
+        PRODUCT_NAME := omni_ursus_b38
+        PRODUCT_BRAND := dexp
+        PRODUCT_MODEL := Ursus B38
+        PRODUCT_MANUFACTURER := dexp
+        EOF
 
     - name: Загрузка готового дерева в артефакты
       uses: actions/upload-artifact@v4
