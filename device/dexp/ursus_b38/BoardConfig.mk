@@ -1,3 +1,5 @@
+TARGET_DEVICE := ursus_b38
+
 # Конфигурация железа DEXP Ursus B38 (SC7731E)
 TARGET_ARCH := arm
 TARGET_ARCH_VARIANT := armv7-a-neon
