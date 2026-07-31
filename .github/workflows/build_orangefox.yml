@@ -24,12 +24,31 @@ jobs:
           libxml2-utils xsltproc unzip fontconfig \
           python3 python3-pip python3-venv
 
+    - name: Debug device tree
+      run: |
+        echo "===== Текущая директория ====="
+        pwd
+        echo "===== Поиск BoardConfig.mk ====="
+        find . -name BoardConfig.mk
+        echo "===== Поиск AndroidProducts.mk ====="
+        find . -name AndroidProducts.mk
+        echo "===== Поиск всех .mk ====="
+        find . -name "*.mk" | head -20
+        echo "===== Структура device ====="
+        ls -R device || echo "Папка device не найдена"
+        echo "===== Содержимое AndroidProducts.mk ====="
+        cat device/dexp/ursus_b38/AndroidProducts.mk || echo "Файл не найден"
+        echo "===== Содержимое BoardConfig.mk ====="
+        cat device/dexp/ursus_b38/BoardConfig.mk || echo "Файл не найден"
+        echo "===== Проверка Git внутри дерева ====="
+        git -C device/dexp/ursus_b38 rev-parse --show-toplevel || echo "Не Git-репозиторий"
+
     - name: Build OrangeFox Recovery
       uses: UWU-TEAM/UWU-OrangeFox-Builder@v1.0.0
       with:
         USER_NAME: 'Egor'
         USER_EMAIL: 'egor@gmail.com'
-        DEVICE_TREE: 'https://github.com/Egor-Vol8/android_device_dexp_ursus_b38.git'
+        DEVICE_TREE: 'https://github.com/Egor-Vol8/device_dexp_ursus_b38.git'
         DEVICE_TREE_BRANCH: 'main'
         DEVICE_PATH: 'device/dexp/ursus_b38'
         DEVICE_NAME: 'ursus_b38'
