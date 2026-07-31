@@ -1,4 +1,4 @@
-name: Build OrangeFox Recovery Final
+name: Build OrangeFox Recovery for DEXP Ursus B38
 
 on:
   workflow_dispatch:
@@ -10,17 +10,25 @@ jobs:
       contents: write
 
     steps:
-    - name: Проверка репозитория
+    - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Сборка OrangeFox
+    - name: Setup build environment
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          git-core gnupg flex bison gperf build-essential \
+          zip curl zlib1g-dev gcc-multilib g++-multilib \
+          libc6-dev-i386 lib32ncurses5-dev x11proto-core-dev \
+          libx11-dev lib32z-dev libgl1-mesa-dev \
+          libxml2-utils xsltproc unzip fontconfig \
+          python3 python3-pip python3-venv
+
+    - name: Build OrangeFox Recovery
       uses: UWU-TEAM/UWU-OrangeFox-Builder@v1.0.0
       with:
         USER_NAME: 'Egor'
         USER_EMAIL: 'egor@gmail.com'
-        # Чистая ссылка с официальным токеном авторизации самого GitHub
-        DEVICE_TREE: 'https://${{ github.token }}@://github.com'
-        DEVICE_TREE_BRANCH: 'main'
         DEVICE_PATH: 'device/dexp/ursus_b38'
         DEVICE_NAME: 'ursus_b38'
         BUILD_TARGET: 'recovery'
