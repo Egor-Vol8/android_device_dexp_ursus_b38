@@ -13,26 +13,14 @@ jobs:
     - name: Проверка репозитория
       uses: actions/checkout@v4
 
-    - name: Подготовка файлов дерева локально
-      run: |
-        # Создаем структуру папок прямо на сервере
-        mkdir -p device/dexp/ursus_b38
-        
-        # Просто копируем все твои файлы из репозитория на свои места
-        cp BoardConfig.mk device/dexp/ursus_b38/ 2>/dev/null || true
-        cp AndroidProducts.mk device/dexp/ursus_b38/ 2>/dev/null || true
-        cp omni_ursus_b38.mk device/dexp/ursus_b38/ 2>/dev/null || true
-        cp recovery.fstab device/dexp/ursus_b38/ 2>/dev/null || true
-        cp kernel device/dexp/ursus_b38/ 2>/dev/null || true
-        cp dtb device/dexp/ursus_b38/ 2>/dev/null || true
-
     - name: Сборка OrangeFox
       uses: UWU-TEAM/UWU-OrangeFox-Builder@v1.0.0
       with:
         USER_NAME: 'Egor'
         USER_EMAIL: 'egor@gmail.com'
-        # Пишем слово local маленькими буквами без кавычек
-        DEVICE_TREE: local
+        # Чистая ссылка с официальным токеном авторизации самого GitHub
+        DEVICE_TREE: 'https://${{ github.token }}@://github.com'
+        DEVICE_TREE_BRANCH: 'main'
         DEVICE_PATH: 'device/dexp/ursus_b38'
         DEVICE_NAME: 'ursus_b38'
         BUILD_TARGET: 'recovery'
