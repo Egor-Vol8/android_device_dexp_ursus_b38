@@ -20,7 +20,7 @@ jobs:
         USER_EMAIL: 'egor@gmail.com'
         # ВСТАВЬ СВОЙ ТОКЕН В СТРОКУ НИЖЕ вместо слов ТВОЙ_ТОКЕН_СЮДА
         # Обязательно сохрани структуру с кавычками "" посередине, чтобы фильтры бота не зарезали код!
-        DEVICE_TREE: 'https://""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""@://github.com'
+        DEVICE_TREE: 'https://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@://github.com'
         DEVICE_TREE_BRANCH: 'main'
         DEVICE_PATH: 'device/dexp/ursus_b38'
         DEVICE_NAME: 'ursus_b38'
