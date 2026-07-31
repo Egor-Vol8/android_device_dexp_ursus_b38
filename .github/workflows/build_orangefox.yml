@@ -1,56 +1,54 @@
-name: Build OrangeFox Recovery for DEXP Ursus B38
+TARGET_DEVICE := ursus_b38
 
-on:
-  workflow_dispatch:
+# ABI
+TARGET_CPU_ABI := armeabi-v7a
+TARGET_CPU_ABI2 := 
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
+# Конфигурация железа DEXP Ursus B38 (SC7731E)
+TARGET_ARCH := arm
+TARGET_ARCH_VARIANT := armv7-a-neon
+TARGET_CPU_VARIANT := cortex-a7
+TARGET_CPU_SMP := true
 
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+# Платформа Spreadtrum
+TARGET_BOARD_PLATFORM := sc7731e
+BOARD_USES_MTK_HARDWARE := false
+TARGET_BOOTLOADER_BOARD_NAME := sprd
 
-    - name: Setup build environment
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          git-core gnupg flex bison gperf build-essential \
-          zip curl zlib1g-dev gcc-multilib g++-multilib \
-          libc6-dev-i386 lib32ncurses-dev x11proto-core-dev \
-          libx11-dev lib32z1-dev libgl1-mesa-dev \
-          libxml2-utils xsltproc unzip fontconfig \
-          python3 python3-pip python3-venv
+# Ядро (относительные пути)
+TARGET_PREBUILT_KERNEL := kernel
+TARGET_PREBUILT_DTB := dtb
+BOARD_KERNEL_IMAGE_NAME := zImage
+BOARD_KERNEL_CMDLINE := console=ttyS1,115200n8 buildvariant=user
+BOARD_KERNEL_BASE := 0x00000000
+BOARD_PAGE_SIZE := 2048
 
-    - name: Debug device tree
-      run: |
-        echo "===== Текущая директория ====="
-        pwd
-        echo "===== Поиск BoardConfig.mk ====="
-        find . -name BoardConfig.mk
-        echo "===== Поиск AndroidProducts.mk ====="
-        find . -name AndroidProducts.mk
-        echo "===== Поиск всех .mk ====="
-        find . -name "*.mk" | head -20
-        echo "===== Структура device ====="
-        ls -R device || echo "Папка device не найдена"
-        echo "===== Содержимое AndroidProducts.mk ====="
-        cat device/dexp/ursus_b38/AndroidProducts.mk || echo "Файл не найден"
-        echo "===== Содержимое BoardConfig.mk ====="
-        cat device/dexp/ursus_b38/BoardConfig.mk || echo "Файл не найден"
-        echo "===== Проверка Git внутри дерева ====="
-        git -C device/dexp/ursus_b38 rev-parse --show-toplevel || echo "Не Git-репозиторий"
+# Разделы
+BOARD_RECOVERYIMAGE_PARTITION_SIZE := 36700160
+BOARD_FLASH_BLOCK_SIZE := 131072
 
-    - name: Build OrangeFox Recovery
-      uses: UWU-TEAM/UWU-OrangeFox-Builder@v1.0.0
-      with:
-        USER_NAME: 'Egor'
-        USER_EMAIL: 'egor@gmail.com'
-        DEVICE_TREE: 'https://github.com/Egor-Vol8/device_dexp_ursus_b38.git'
-        DEVICE_TREE_BRANCH: 'main'
-        DEVICE_PATH: 'device/dexp/ursus_b38'
-        DEVICE_NAME: 'ursus_b38'
-        BUILD_TARGET: 'recovery'
-        GH_RELEASE: 'true'
+# Fstab
+TARGET_RECOVERY_FSTAB := recovery.fstab
+TARGET_RECOVERY_UI_LIB := librecovery_ui_sprd
+TARGET_RECOVERY_PIXEL_FORMAT := "RGBX_8888"
+TARGET_SCREEN_HEIGHT := 800
+TARGET_SCREEN_WIDTH := 1280
+
+# Orange Fox
+FOX_VERSION := R11.1
+OF_MAINTAINER := Egor-Vol8
+DISABLE_STYLUS_FUNCTIONS := true
+TARGET_USERIMAGES_USE_EXT4 := true
+TARGET_USERIMAGES_USE_F2FS := true
+
+# Шифрование
+TW_INCLUDE_CRYPTO := true
+TW_CRYPTO_FS_TYPE := "f2fs"
+TW_CRYPTO_REAL_BLKDEV := "/dev/block/platform/soc/soc:ap-ahb/20600000.sdio/by-name/userdata"
+TW_CRYPTO_MNT_POINT := "/data"
+TW_CRYPTO_FS_OPTIONS := "noatime,nosuid,nodev,discard,inline_xattr,inline_data"
+
+# Стабильность
+BOARD_SUPPRESS_SECURE_ERASE := true
+TARGET_RECOVERY_QCOM_RTC_FIX := false
+FOX_USE_TWRP_RECOVERY_IMAGE_BUILDER := true
