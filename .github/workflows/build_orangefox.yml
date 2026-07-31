@@ -24,31 +24,6 @@ jobs:
           libxml2-utils xsltproc unzip fontconfig \
           python3 python3-pip python3-venv
 
-    - name: Force create device tree
-      run: |
-        # Создаём папку, если её нет
-        mkdir -p device/dexp/ursus_b38
-        
-        # Копируем все файлы из корня репозитория в папку устройства
-        # Если файлы уже лежат в device/dexp/ursus_b38/, эта команда просто обновит их
-        cp -r ./* device/dexp/ursus_b38/ 2>/dev/null || true
-        
-        # Удаляем лишнее (чтобы не мешало)
-        rm -rf device/dexp/ursus_b38/.github
-        rm -rf device/dexp/ursus_b38/.git
-        rm -f device/dexp/ursus_b38/README.md
-        rm -f device/dexp/ursus_b38/.gitkeep
-        rm -f device/dexp/ursus_b38/.gitignore
-        
-        # Проверяем, что файлы на месте
-        ls -la device/dexp/ursus_b38/
-        
-        # Проверяем содержимое ключевых файлов (для отладки)
-        echo "=== AndroidProducts.mk ==="
-        cat device/dexp/ursus_b38/AndroidProducts.mk || echo "Файл отсутствует!"
-        echo "=== twrp_ursus_b38.mk ==="
-        cat device/dexp/ursus_b38/twrp_ursus_b38.mk || echo "Файл отсутствует!"
-
     - name: Build OrangeFox Recovery
       uses: UWU-TEAM/UWU-OrangeFox-Builder@v1.0.0
       with:
@@ -58,4 +33,3 @@ jobs:
         DEVICE_NAME: 'ursus_b38'
         BUILD_TARGET: 'recovery'
         GH_RELEASE: 'true'
-        SKIP_DEVICE_TREE_CLONE: 'true'
