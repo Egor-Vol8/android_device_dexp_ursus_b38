@@ -53,4 +53,5 @@ jobs:
         DEVICE_PATH: 'device/dexp/ursus_b38'
         DEVICE_NAME: 'ursus_b38'
         BUILD_TARGET: 'recovery'
+        FOX_BRANCH: '11.0'
         GH_RELEASE: 'true'
