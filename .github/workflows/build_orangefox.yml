@@ -16,8 +16,8 @@ jobs:
     - name: Сборка OrangeFox
       uses: UWU-TEAM/UWU-OrangeFox-Builder@v1.0.0
       with:
-        USER_NAME: 'Egor'
-        USER_EMAIL: 'egor@gmail.com'
+        USER_NAME: 'Egor-Vol8'
+        USER_EMAIL: 'akkauntzcvi@gmail.com'
         # Чистая ссылка без кавычек, плагин проглотит её идеально
         DEVICE_TREE: 'https://github.com/Egor-Vol8/android_device_dexp_ursus_b38'
         DEVICE_TREE_BRANCH: 'main'
